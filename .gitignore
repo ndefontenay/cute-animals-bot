@@ -10,6 +10,10 @@ data/approved/
 *.mov
 *.avi
 token.json
+token.pickle
 client_secret*.json
+data/music/
+data/metrics.json
+data/review_queue.json
 venv/
 .venv/

@@ -1,9 +1,11 @@
 import os
 from dotenv import load_dotenv
 
-load_dotenv()
+_env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env")
+load_dotenv(dotenv_path=_env_path, override=True)
 
 PEXELS_API_KEY = os.getenv("PEXELS_API_KEY")
+PIXABAY_API_KEY = os.getenv("PIXABAY_API_KEY")
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
 ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY")
 ELEVENLABS_VOICE_ID = os.getenv("ELEVENLABS_VOICE_ID", "21m00Tcm4TlvDq8ikWAM")
@@ -26,6 +28,8 @@ APPROVED_DIR = os.path.join(DATA_DIR, "approved")
 PEXELS_QUERIES = [
     "cute cat", "cute dog", "baby animal", "funny kitten",
     "puppy playing", "cute bunny", "baby duck", "hamster",
+    "fox", "baby fox", "mink", "puppy", "ocelot",
+    "puppies stumbling", "cute white stoat",
 ]
 
 VIDEO_MIN_DURATION = 8    # seconds

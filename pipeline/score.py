@@ -1,21 +1,34 @@
 import base64
+import json
 import subprocess
 import anthropic
 from config.settings import ANTHROPIC_API_KEY
 
-client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+_client = None
+
+def _get_client():
+    global _client
+    if _client is None:
+        _client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+    return _client
 
 SCORE_PROMPT = """You are evaluating a video clip for a cute animals YouTube Shorts channel.
 
-Look at this frame from the video and score it from 1 to 10 on:
+Look at this frame and score it from 1 to 10 on these criteria:
 1. Cuteness/emotional appeal (will viewers say "aww"?)
 2. Hook strength (is something engaging happening that grabs attention immediately?)
 3. Visual clarity (well-lit, in focus, not shaky?)
+4. Authenticity (natural setting preferred — penalize fake/plastic plants, obvious studio props, artificial backgrounds, green screen)
+
+Hard deductions:
+- Fake or artificial-looking background/props: subtract 2-3 points
+- Animal face not visible or obscured: subtract 2 points
+- Blurry or poorly lit: subtract 2 points
 
 Respond with ONLY a JSON object like:
-{"score": 8, "reason": "Fluffy kitten mid-yawn, very clear and endearing, strong immediate hook"}
+{"score": 8, "reason": "Fluffy kitten mid-yawn, natural home setting, very clear and endearing"}
 
-Score 7+ means publish-worthy. Be honest and strict — only high-quality clips should pass."""
+Score 7+ means publish-worthy. Be honest and strict — only high-quality, authentic-looking clips should pass."""
 
 
 def extract_frame(video_path: str, second: float = 1.5) -> bytes:
@@ -36,7 +49,7 @@ def score_clip(video_path: str) -> dict:
 
     frame_b64 = base64.standard_b64encode(frame_bytes).decode("utf-8")
 
-    message = client.messages.create(
+    message = _get_client().messages.create(
         model="claude-opus-4-7",
         max_tokens=200,
         messages=[{
@@ -48,7 +61,6 @@ def score_clip(video_path: str) -> dict:
         }]
     )
 
-    import json
     try:
         return json.loads(message.content[0].text)
     except Exception:
