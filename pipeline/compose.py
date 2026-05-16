@@ -24,12 +24,34 @@ Rules:
 
 Respond with ONLY the caption text."""
 
+DESCRIPTION_PROMPT = """Write a YouTube description for a cute animal Short.
+The video is: {description}
+
+Rules:
+- 2 sentences max, warm and conversational
+- Then a blank line
+- Then 5-8 relevant hashtags (e.g. #CuteAnimals #Fox #Shorts)
+- Then a blank line
+- Then exactly this line: Video footage provided by Pexels.com
+- Then exactly this line: 🤖 Generated with AI
+
+Respond with ONLY the description text, no extra commentary."""
+
 
 def generate_caption(description: str) -> str:
     message = _get_client().messages.create(
         model="claude-haiku-4-5-20251001",
         max_tokens=50,
         messages=[{"role": "user", "content": CAPTION_PROMPT.format(description=description)}]
+    )
+    return message.content[0].text.strip()
+
+
+def generate_description(description: str) -> str:
+    message = _get_client().messages.create(
+        model="claude-haiku-4-5-20251001",
+        max_tokens=200,
+        messages=[{"role": "user", "content": DESCRIPTION_PROMPT.format(description=description)}]
     )
     return message.content[0].text.strip()
 
@@ -47,8 +69,11 @@ def has_audio_stream(video_path: str) -> bool:
         return False
 
 
-def compose_video(input_path: str, score_info: dict, output_name: str) -> str:
-    caption = generate_caption(score_info.get("reason", "cute animal video"))
+def compose_video(input_path: str, score_info: dict, output_name: str) -> tuple[str, str]:
+    """Returns (output_path, youtube_description)."""
+    reason = score_info.get("reason", "cute animal video")
+    caption = generate_caption(reason)
+    description = generate_description(reason)
     output_path = os.path.join(COMPOSED_DIR, f"{output_name}.mp4")
 
     # Strip any character that could break FFmpeg filter syntax
@@ -106,4 +131,4 @@ def compose_video(input_path: str, score_info: dict, output_name: str) -> str:
         ]
 
     subprocess.run(cmd, check=True, capture_output=True)
-    return output_path
+    return output_path, description

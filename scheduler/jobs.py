@@ -73,16 +73,16 @@ def run_pipeline():
 
     # Compose
     output_name = f"short_{best['candidate']['pexels_id']}"
-    composed_path = compose_video(best["path"], {"reason": best["reason"]}, output_name)
+    composed_path, yt_description = compose_video(best["path"], {"reason": best["reason"]}, output_name)
     print(f"Composed: {composed_path}")
 
     if MANUAL_REVIEW:
-        # Add to review queue
         queue = load_queue()
         queue.append({
             "filename": os.path.basename(composed_path),
             "score": best["score"],
             "reason": best["reason"],
+            "description": yt_description,
             "status": "pending"
         })
         save_queue(queue)
@@ -110,7 +110,8 @@ def upload_approved():
 
 def _do_upload(path: str, info: dict):
     title = "You won't believe how cute this is 🐾"
+    description = info.get("description", "")
     print(f"Uploading {path}...")
-    video_id = upload_short(path, title=title)
+    video_id = upload_short(path, title=title, description=description)
     print(f"Uploaded! https://youtube.com/shorts/{video_id}")
     record_upload(video_id, info.get("score", 0), os.path.basename(path))
