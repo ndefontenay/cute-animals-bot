@@ -1,0 +1,15 @@
+.env
+__pycache__/
+*.pyc
+*.pyo
+data/candidates/
+data/composed/
+data/rejected/
+data/approved/
+*.mp4
+*.mov
+*.avi
+token.json
+client_secret*.json
+venv/
+.venv/
