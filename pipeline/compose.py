@@ -24,6 +24,17 @@ Rules:
 
 Respond with ONLY the caption text."""
 
+TITLE_PROMPT = """Write a YouTube title for a cute animal Short.
+The video is: {description}
+
+Rules:
+- Max 60 characters
+- Warm, curious, or slightly funny — makes people want to click
+- No clickbait, no ALL CAPS, no emojis
+- No hashtags
+
+Respond with ONLY the title text."""
+
 DESCRIPTION_PROMPT = """Write a YouTube description for a cute animal Short.
 The video is: {description}
 
@@ -43,6 +54,15 @@ def generate_caption(description: str) -> str:
         model="claude-haiku-4-5-20251001",
         max_tokens=50,
         messages=[{"role": "user", "content": CAPTION_PROMPT.format(description=description)}]
+    )
+    return message.content[0].text.strip()
+
+
+def generate_title(description: str) -> str:
+    message = _get_client().messages.create(
+        model="claude-haiku-4-5-20251001",
+        max_tokens=80,
+        messages=[{"role": "user", "content": TITLE_PROMPT.format(description=description)}]
     )
     return message.content[0].text.strip()
 
@@ -69,11 +89,13 @@ def has_audio_stream(video_path: str) -> bool:
         return False
 
 
-def compose_video(input_path: str, score_info: dict, output_name: str) -> tuple[str, str]:
-    """Returns (output_path, youtube_description)."""
+def compose_video(input_path: str, score_info: dict, output_name: str) -> tuple[str, str, str]:
+    """Returns (output_path, title, youtube_description)."""
     reason = score_info.get("reason", "cute animal video")
     caption = generate_caption(reason)
+    title = generate_title(reason)
     description = generate_description(reason)
+    print(f"    Title: {title}")
     output_path = os.path.join(COMPOSED_DIR, f"{output_name}.mp4")
 
     # Strip any character that could break FFmpeg filter syntax
@@ -131,4 +153,4 @@ def compose_video(input_path: str, score_info: dict, output_name: str) -> tuple[
         ]
 
     subprocess.run(cmd, check=True, capture_output=True)
-    return output_path, description
+    return output_path, title, description

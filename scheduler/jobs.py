@@ -73,7 +73,7 @@ def run_pipeline():
 
     # Compose
     output_name = f"short_{best['candidate']['pexels_id']}"
-    composed_path, yt_description = compose_video(best["path"], {"reason": best["reason"]}, output_name)
+    composed_path, yt_title, yt_description = compose_video(best["path"], {"reason": best["reason"]}, output_name)
     print(f"Composed: {composed_path}")
 
     if MANUAL_REVIEW:
@@ -82,6 +82,7 @@ def run_pipeline():
             "filename": os.path.basename(composed_path),
             "score": best["score"],
             "reason": best["reason"],
+            "title": yt_title,
             "description": yt_description,
             "status": "pending"
         })
@@ -109,7 +110,7 @@ def upload_approved():
 
 
 def _do_upload(path: str, info: dict):
-    title = "You won't believe how cute this is 🐾"
+    title = info.get("title", "Cute animal of the day")
     description = info.get("description", "")
     print(f"Uploading {path}...")
     video_id = upload_short(path, title=title, description=description)
