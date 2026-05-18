@@ -43,7 +43,6 @@ Rules:
 - Then a blank line
 - Then 5-8 relevant hashtags (e.g. #CuteAnimals #Fox #Shorts)
 - Then a blank line
-- Then exactly this line: Video footage provided by Pexels.com
 - Then exactly this line: 🤖 Generated with AI
 
 Respond with ONLY the description text, no extra commentary."""

@@ -15,5 +15,6 @@ client_secret*.json
 data/music/
 data/metrics.json
 data/review_queue.json
+data/seen_ids.json
 venv/
 .venv/

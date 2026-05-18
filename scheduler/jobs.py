@@ -8,7 +8,7 @@ from config.settings import (
     CANDIDATES_PER_RUN, MIN_QUALITY_SCORE, MANUAL_REVIEW,
     REJECTED_DIR, APPROVED_DIR, COMPOSED_DIR
 )
-from pipeline.fetch import fetch_candidates, download_clip
+from pipeline.fetch import fetch_candidates, download_clip, save_seen_id
 from pipeline.filter import passes_technical_filter
 from pipeline.score import score_clip
 from pipeline.compose import compose_video
@@ -49,12 +49,15 @@ def run_pipeline():
         if not passes:
             print(f"    REJECTED (technical): {reason}")
             shutil.move(path, os.path.join(REJECTED_DIR, os.path.basename(path)))
+            save_seen_id(c["pexels_id"])
             continue
 
         # AI quality score
         result = score_clip(path)
         score = result.get("score", 0)
         print(f"    AI score: {score}/10 — {result.get('reason','')}")
+
+        save_seen_id(c["pexels_id"])  # mark as seen regardless of score
 
         if score < MIN_QUALITY_SCORE:
             print(f"    REJECTED (score too low)")
